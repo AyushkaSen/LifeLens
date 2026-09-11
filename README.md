@@ -188,22 +188,43 @@ erDiagram
 
 ## 10. Quick Start & Verification
 
-### Running the Application Locally
+### Running the Application Locally & on Mobile
 
 1. Install Python dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-2. Start the FastAPI server:
+2. Start the FastAPI server (listening on all network interfaces):
    ```bash
-   python -m uvicorn app.main:app --port 8000 --reload
+   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
-3. Open your browser to:
+3. **Desktop**: Open `http://127.0.0.1:8000`
+4. **Mobile (on the same Wi-Fi)**:
+   Find your computer's local IP address (e.g. `ipconfig` on Windows or `ifconfig` on Mac/Linux, such as `192.168.1.16`). Open your phone's browser and go to:
    ```
-   http://127.0.0.1:8000
+   http://<YOUR_LOCAL_IP>:8000
+   # Example: http://192.168.1.16:8000
    ```
+
+### 1-Click Free Cloud Deployment (24/7 Web Access)
+
+You can deploy LifeLens directly to cloud hosting platforms from this GitHub repository:
+
+- **Render** ([render.com](https://render.com)):
+  1. Click **New +** -> **Web Service** -> Connect GitHub repo `AyushkaSen/LifeLens`.
+  2. Select Python runtime, or let Render detect `render.yaml`.
+  3. Click **Create Web Service**. Your live URL will be ready at `https://lifelens.onrender.com`!
+
+- **Railway** ([railway.app](https://railway.app)):
+  1. Click **New Project** -> **Deploy from GitHub repo** -> Select `LifeLens`.
+  2. Railway automatically detects `Dockerfile` / `Procfile` and assigns a public HTTPS domain.
+
+- **Vercel** ([vercel.com](https://vercel.com)):
+  1. Import Git repository -> Select `LifeLens`.
+  2. Vercel uses `vercel.json` to deploy the FastAPI application serverlessly.
 
 ### Running Automated Tests
 ```bash
 pytest -v
 ```
+
