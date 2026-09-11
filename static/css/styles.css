@@ -1,0 +1,80 @@
+/* LifeLens Custom Styles and Utilities */
+:root {
+  --primary: #0f766e;
+  --primary-hover: #0d9488;
+  --primary-container: #0f766e;
+  --on-primary: #ffffff;
+  --surface: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-low: #f1f5f9;
+  --border-hairline: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --tertiary: #00776b;
+  --aqua: #80d5cb;
+  --error: #ba1a1a;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display, .font-headline {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom transitions */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tab active states */
+.nav-item.active {
+  background-color: #e5eeff;
+  color: #0b1c30;
+  font-weight: 500;
+}
+
+/* Scrollbar polish */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Modal overlay animation */
+.modal-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+/* Timer progress ring */
+.timer-circle-bg {
+  stroke: #e2e8f0;
+}
+.timer-circle-progress {
+  stroke: #0f766e;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Plotly container adjustments */
+.plotly-chart-container .modebar {
+  display: none !important;
+}

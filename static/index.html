@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LifeLens — Productivity & Nutrition Analytics</title>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <!-- Tailwind CSS with LifeLens Design Tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#005c55",
+            "primary-container": "#0f766e",
+            "on-primary": "#ffffff",
+            "secondary": "#006a61",
+            "secondary-container": "#86f2e4",
+            "on-secondary-container": "#006f66",
+            "tertiary": "#005c52",
+            "tertiary-container": "#00776b",
+            "surface": "#f8f9ff",
+            "surface-dim": "#cbdbf5",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#eff4ff",
+            "surface-container": "#e5eeff",
+            "surface-container-high": "#dce9ff",
+            "surface-variant": "#d3e4fe",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#3e4947",
+            "outline": "#6e7977",
+            "outline-variant": "#bdc9c6",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+          },
+          fontFamily: {
+            "display": ["Hanken Grotesk", "sans-serif"],
+            "headline-lg": ["Hanken Grotesk", "sans-serif"],
+            "headline-md": ["Hanken Grotesk", "sans-serif"],
+            "headline-sm": ["Hanken Grotesk", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="/static/css/styles.css"/>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased">
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest flex flex-col justify-between z-50 border-r border-surface-container-high/60 shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+    <div class="flex flex-col flex-1 overflow-y-auto px-4 pt-5 pb-3">
+      <!-- App Brand Header -->
+      <div class="flex items-center justify-between px-2 mb-6">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="App.showView('dashboard')">
+          <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-white shadow-sm">
+            <span class="material-symbols-outlined text-[20px]">lens_blur</span>
+          </div>
+          <span class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">LifeLens</span>
+        </div>
+        <span class="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-secondary-container text-on-secondary-container font-semibold tracking-wider">MVP</span>
+      </div>
+
+      <!-- Streak Pill -->
+      <div class="mb-5 px-1">
+        <div class="p-3 rounded-lg bg-surface-container-low border border-surface-container-high/50">
+          <div class="flex items-center justify-between text-on-surface-variant font-mono text-[11px] uppercase">
+            <span class="flex items-center gap-1 text-primary font-medium">
+              <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
+              14-Day Focus
+            </span>
+            <span class="font-bold">85%</span>
+          </div>
+          <div class="w-full bg-surface-variant h-1.5 rounded-full mt-2 overflow-hidden">
+            <div class="bg-primary-container h-full rounded-full" style="width: 85%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Navigation Links -->
+      <nav class="flex flex-col gap-1">
+        <a href="#" data-path="dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container text-on-surface font-medium transition-colors">
+          <span class="material-symbols-outlined text-[18px]">grid_view</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" data-path="tasks" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+          <span>Tasks</span>
+        </a>
+        <a href="#" data-path="focus-timer" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-[18px]">timer</span>
+          <span>Focus Timer</span>
+        </a>
+        <a href="#" data-path="meals" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-[18px]">restaurant</span>
+          <span>Meals & Nutrition</span>
+        </a>
+      </nav>
+
+      <div class="my-4 h-px bg-surface-container-high"></div>
+
+      <!-- Secondary Info Navigation -->
+      <nav class="flex flex-col gap-1">
+        <a href="#" data-path="privacy" class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-[18px]">shield_person</span>
+          <span>Privacy & Methodology</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 m-3 rounded-lg bg-surface-container-low flex items-center justify-between border border-surface-container-high/40">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">
+          LL
+        </div>
+        <div class="min-w-0">
+          <p class="font-body-md text-[13px] text-on-surface font-medium truncate">LifeLens Explorer</p>
+          <p class="font-mono text-[10px] text-on-surface-variant truncate">Local SQLite Active</p>
+        </div>
+      </div>
+      <span class="material-symbols-outlined text-[16px] text-primary">lock</span>
+    </div>
+  </aside>
+
+  <!-- Main Container -->
+  <div class="pl-64 min-h-screen flex flex-col">
+    <!-- Top Persistent Header -->
+    <header class="fixed top-0 left-64 right-0 h-14 bg-surface/85 backdrop-blur-xl border-b border-surface-container-high/60 z-40 flex items-center justify-between px-8">
+      <div class="flex items-center gap-4">
+        <span id="header-date-display" class="font-mono text-body-sm text-on-surface-variant font-medium"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="add-task-header-btn" onclick="document.getElementById('task-modal').classList.remove('hidden')" class="h-8 px-3 rounded-lg bg-surface-container-low text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors flex items-center gap-1.5 text-body-sm font-medium">
+          <span class="material-symbols-outlined text-[16px]">add_task</span>
+          <span>New Task</span>
+        </button>
+        <button id="quick-log-btn" class="h-8 px-3 rounded-lg bg-primary-container text-white font-body-sm font-medium hover:bg-tertiary-container transition-colors flex items-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">add</span>
+          <span>Log Meal</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Body -->
+    <main class="pt-14 px-8 py-6 flex-1">
+      <div class="w-full max-w-[1440px] mx-auto pb-12">
+
+        <!-- ==================================================== -->
+        <!-- VIEW: DASHBOARD -->
+        <!-- ==================================================== -->
+        <div id="view-dashboard" class="view-panel flex flex-col gap-6">
+          <!-- Top Greeting & Scope Switcher -->
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-1">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container text-primary font-mono text-[11px] uppercase tracking-wider font-semibold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                  Local Engine Active
+                </span>
+                <span class="text-on-surface-variant font-mono text-[11px]">SQLite Sync</span>
+              </div>
+              <h1 class="font-display text-2xl md:text-3xl text-on-surface font-bold tracking-tight">Performance & Nutrition Synthesis</h1>
+              <p class="font-body-md text-on-surface-variant mt-0.5">Monitoring cognitive focus latency, task velocity, and metabolic fuel pacing.</p>
+            </div>
+
+            <!-- Date Scope Selector -->
+            <div class="flex items-center bg-surface-container-low p-1 rounded-lg self-start md:self-auto shadow-sm border border-surface-container-high/50">
+              <button data-scope="today" class="scope-btn px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface font-body-sm transition-colors text-[13px]">Today</button>
+              <button data-scope="week" class="scope-btn px-3 py-1 rounded-md text-on-surface font-body-sm font-medium bg-surface-container-lowest shadow-sm transition-all text-[13px]">7 Days</button>
+              <button data-scope="month" class="scope-btn px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface font-body-sm transition-colors text-[13px]">30 Days</button>
+            </div>
+          </div>
+
+          <!-- Row 1: 4 Key Metric Stat Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <!-- Card 1: Tasks Completed -->
+            <div class="p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-mono text-[11px] uppercase text-on-surface-variant tracking-wider font-medium">Tasks Completed</span>
+                  <div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[17px]">task_alt</span>
+                  </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span id="stat-tasks-val" class="font-display text-2xl font-bold text-on-surface">--</span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+                  <div id="stat-tasks-bar" class="bg-primary-container h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center justify-between mt-2 font-body-sm text-on-surface-variant text-[12px]">
+                  <span id="stat-tasks-sub" class="font-mono">Syncing...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Focus Duration -->
+            <div class="p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-mono text-[11px] uppercase text-on-surface-variant tracking-wider font-medium">Focus Duration</span>
+                  <div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[17px]">timelapse</span>
+                  </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span id="stat-focus-val" class="font-display text-2xl font-bold text-on-surface">--</span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+                  <div id="stat-focus-bar" class="bg-primary-container h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center justify-between mt-2 font-body-sm text-on-surface-variant text-[12px]">
+                  <span id="stat-focus-sub" class="font-mono">Syncing...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Metabolic Fuel Logged -->
+            <div class="p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-mono text-[11px] uppercase text-on-surface-variant tracking-wider font-medium">Metabolic Fuel</span>
+                  <span class="px-2 py-0.5 rounded-full bg-secondary-container/40 text-on-secondary-container font-mono text-[10px] uppercase font-semibold">Tracked</span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="stat-fuel-val" class="font-display text-2xl font-bold text-on-surface">--</span>
+                </div>
+              </div>
+              <div class="mt-3">
+                <span id="stat-fuel-sub" class="font-mono text-[12px] text-on-surface-variant">Calorie target intake</span>
+              </div>
+            </div>
+
+            <!-- Card 4: Habit Streak -->
+            <div class="p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-mono text-[11px] uppercase text-on-surface-variant tracking-wider font-medium">Discipline Streak</span>
+                  <div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[17px]">local_fire_department</span>
+                  </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span id="stat-streak-val" class="font-display text-2xl font-bold text-on-surface">14 Days</span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="flex gap-1">
+                  <span class="flex-1 h-1.5 rounded-full bg-primary-container"></span>
+                  <span class="flex-1 h-1.5 rounded-full bg-primary-container"></span>
+                  <span class="flex-1 h-1.5 rounded-full bg-primary-container"></span>
+                  <span class="flex-1 h-1.5 rounded-full bg-primary-container"></span>
+                  <span class="flex-1 h-1.5 rounded-full bg-primary-container"></span>
+                  <span class="flex-1 h-1.5 rounded-full bg-surface-container-high"></span>
+                </div>
+                <div class="flex items-center justify-between mt-2 font-mono text-[11px] text-on-surface-variant">
+                  <span>Personal best: 21 days</span>
+                  <span class="text-primary font-medium">7d to beat</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Analytics Grid: Left (7 Cols) & Right (5 Cols) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left Column: Performance & Visualizations -->
+            <div class="lg:col-span-7 flex flex-col gap-6">
+              <!-- Plotly Chart 1: Weekly Planned vs Completed Velocity -->
+              <div class="p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Weekly Execution Velocity</h2>
+                    <p class="font-body-sm text-on-surface-variant mt-0.5">Commitments planned vs completed across days</p>
+                  </div>
+                  <div class="flex items-center gap-3 text-body-sm font-mono text-[12px]">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-primary-container"></span> Completed</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-slate-300"></span> Planned</span>
+                  </div>
+                </div>
+                <div id="chart-weekly-velocity" class="w-full h-56 plotly-chart-container"></div>
+              </div>
+
+              <!-- Plotly Chart 2: Estimated vs Actual Duration -->
+              <div class="p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Estimated vs. Actual Focus</h2>
+                    <p class="font-body-sm text-on-surface-variant mt-0.5">Tracking cognitive variance and duration accuracy per task</p>
+                  </div>
+                  <span class="font-mono text-[11px] uppercase px-2 py-1 rounded bg-surface-container text-on-surface-variant">Duration Audit</span>
+                </div>
+                <div id="chart-est-vs-actual" class="w-full h-56 plotly-chart-container"></div>
+              </div>
+
+              <!-- Plotly Chart 3: Total Focus Time vs Daily Target -->
+              <div class="p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Daily Focus Accumulation</h2>
+                    <p class="font-body-sm text-on-surface-variant mt-0.5">Deep block hours logged against the 4.0-hour daily baseline</p>
+                  </div>
+                  <span class="material-symbols-outlined text-primary">insights</span>
+                </div>
+                <div id="chart-focus-time" class="w-full h-56 plotly-chart-container"></div>
+              </div>
+
+              <!-- Plotly Chart 4: Meal Timing Chrono-Distribution -->
+              <div class="p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Meal Timing & Chrono-Distribution</h2>
+                    <p class="font-body-sm text-on-surface-variant mt-0.5">Hourly distribution of meals throughout the day</p>
+                  </div>
+                  <span class="material-symbols-outlined text-primary">schedule</span>
+                </div>
+                <div id="chart-meal-timing" class="w-full h-44 plotly-chart-container"></div>
+              </div>
+            </div>
+
+            <!-- Right Column: Nutrition Split & AI Daily Observations Panel -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+              <!-- Plotly Chart 5: Macronutrient Split Donut -->
+              <div class="p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Metabolic & Fuel Split</h2>
+                    <p class="font-body-sm text-on-surface-variant">Macronutrient calibration from logged meals</p>
+                  </div>
+                  <span class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[18px]">nutrition</span>
+                  </span>
+                </div>
+                <div id="chart-macro-split" class="w-full h-64 plotly-chart-container"></div>
+              </div>
+
+              <!-- Visually Separated "Daily Analyst" Panel (AI Observations) -->
+              <div class="p-6 rounded-xl bg-gradient-to-br from-surface-container via-surface-container-low to-surface-container-lowest border border-surface-container-high/80 shadow-sm relative overflow-hidden">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="flex items-center justify-center w-6 h-6 rounded bg-primary text-white">
+                      <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                    </span>
+                    <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Daily Analyst</h2>
+                  </div>
+                  <span class="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-bold">
+                    ✦ AI Observations
+                  </span>
+                </div>
+                <p class="font-body-sm text-on-surface-variant mb-4">
+                  Synthesizing real-time focus blocks, task estimates, and food timestamps:
+                </p>
+
+                <div class="flex flex-col gap-3">
+                  <!-- Observation 1 -->
+                  <div class="p-3.5 rounded-lg bg-surface-container-lowest border border-surface-container-high/50 shadow-sm flex items-start gap-3">
+                    <div class="w-6 h-6 rounded bg-secondary-container/50 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+                      <span class="material-symbols-outlined text-[16px]">psychology</span>
+                    </div>
+                    <div>
+                      <span class="font-body-sm font-semibold text-primary block mb-0.5 text-[13px]">Focus Peak Synchronization</span>
+                      <p class="font-body-sm text-on-surface leading-relaxed text-[13px]">
+                        Highest deep work completion rate aligns with sessions scheduled 45–75 minutes following morning meals.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Observation 2 -->
+                  <div class="p-3.5 rounded-lg bg-surface-container-lowest border border-surface-container-high/50 shadow-sm flex items-start gap-3">
+                    <div class="w-6 h-6 rounded bg-red-50 flex items-center justify-center text-error flex-shrink-0 mt-0.5">
+                      <span class="material-symbols-outlined text-[16px]">speed</span>
+                    </div>
+                    <div>
+                      <span class="font-body-sm font-semibold text-on-surface block mb-0.5 text-[13px]">Cognitive Drift Monitoring</span>
+                      <p class="font-body-sm text-on-surface leading-relaxed text-[13px]">
+                        Task duration variance averages within 8% of planned estimates on days with balanced protein distribution.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Persistent Medical Disclaimer -->
+                <div class="mt-4 pt-3 border-t border-surface-container-high/60">
+                  <div class="flex items-start gap-2 text-[11px] text-on-surface-variant font-body-sm leading-normal">
+                    <span class="material-symbols-outlined text-[14px] text-primary flex-shrink-0 mt-0.5">info</span>
+                    <span>
+                      <strong>Disclaimer:</strong> LifeLens is a behavioral and productivity self-reflection tool. Observations represent statistical correlations and do not constitute medical, clinical, or professional healthcare advice.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Focus Prompt Card -->
+              <div class="p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-secondary-container/60 flex items-center justify-center text-primary flex-shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">timer</span>
+                  </div>
+                  <div>
+                    <p class="font-headline-sm text-on-surface font-semibold text-sm">Ready for a Pomodoro sprint?</p>
+                    <p class="font-body-sm text-on-surface-variant text-xs">Run a 25-minute focused work block</p>
+                  </div>
+                </div>
+                <button onclick="App.showView('focus-timer'); TimerView.start();" class="px-3 py-1.5 rounded-lg bg-primary-container text-white font-body-sm font-medium hover:bg-tertiary-container transition-colors flex items-center gap-1 text-[13px]">
+                  <span class="material-symbols-outlined text-[15px]">play_arrow</span>
+                  <span>Start</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: TASKS -->
+        <!-- ==================================================== -->
+        <div id="view-tasks" class="view-panel hidden flex flex-col gap-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="font-display text-2xl font-bold text-on-surface">Task Priorities</h1>
+              <p class="font-body-md text-on-surface-variant mt-0.5">Manage tasks, estimated durations, and cognitive commitments.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="tasks-total-count" class="font-mono text-body-sm text-on-surface-variant"></span>
+              <button onclick="document.getElementById('task-modal').classList.remove('hidden')" class="px-4 py-2 rounded-lg bg-primary-container text-white font-body-sm font-medium hover:bg-tertiary-container transition-colors flex items-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">add</span>
+                <span>Add Task</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface-container-lowest border border-surface-container-high/60">
+            <div class="flex items-center gap-2">
+              <label class="font-mono text-[11px] uppercase text-on-surface-variant font-medium">Status:</label>
+              <select id="task-status-filter" class="h-8 px-2.5 text-body-sm rounded-md bg-surface-container-low border border-surface-container-high text-on-surface focus:outline-none">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="font-mono text-[11px] uppercase text-on-surface-variant font-medium">Category:</label>
+              <select id="task-category-filter" class="h-8 px-2.5 text-body-sm rounded-md bg-surface-container-low border border-surface-container-high text-on-surface focus:outline-none">
+                <option value="all">All Categories</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tasks List Container -->
+          <div id="tasks-list-container" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: FOCUS TIMER -->
+        <!-- ==================================================== -->
+        <div id="view-focus-timer" class="view-panel hidden flex flex-col gap-6">
+          <div>
+            <h1 class="font-display text-2xl font-bold text-on-surface">Pomodoro & Focus Sprint</h1>
+            <p class="font-body-md text-on-surface-variant mt-0.5">Tie high-leverage focus blocks to tasks and measure duration drift.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left: Interactive Timer Widget -->
+            <div class="lg:col-span-6 p-8 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col items-center text-center">
+              <!-- Mode Selection Pills -->
+              <div class="flex items-center gap-2 mb-6">
+                <button data-mins="25" class="timer-mode-btn px-3 py-1 rounded-full font-mono text-[12px] bg-primary-container text-white font-medium transition-colors">25m Sprint</button>
+                <button data-mins="50" class="timer-mode-btn px-3 py-1 rounded-full font-mono text-[12px] bg-surface-container-low text-on-surface font-medium transition-colors">50m Deep Block</button>
+                <button data-mins="15" class="timer-mode-btn px-3 py-1 rounded-full font-mono text-[12px] bg-surface-container-low text-on-surface font-medium transition-colors">15m Quick</button>
+              </div>
+
+              <!-- Circular Progress Gauge -->
+              <div class="relative w-60 h-60 flex items-center justify-center my-4">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="88" fill="none" class="timer-circle-bg" stroke-width="10"></circle>
+                  <circle id="timer-circle-bar" cx="100" cy="100" r="88" fill="none" class="timer-circle-progress" stroke-width="10"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="timer-time-display" class="font-display text-4xl md:text-5xl font-bold text-on-surface font-mono tracking-tight">25:00</span>
+                  <span class="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant mt-1">Focus Session</span>
+                </div>
+              </div>
+
+              <!-- Task Attachment Select -->
+              <div class="w-full max-w-sm mt-4 text-left">
+                <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Attached Priority Task:</label>
+                <select id="timer-task-select" class="w-full h-10 px-3 text-body-sm rounded-lg bg-surface-container-low border border-surface-container-high text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container">
+                  <option value="">-- General Focus Session (No Task) --</option>
+                </select>
+              </div>
+
+              <!-- Control Buttons -->
+              <div class="flex items-center gap-3 mt-6">
+                <button id="timer-reset-btn" class="px-4 py-2 rounded-lg bg-surface-container-low text-on-surface font-body-sm hover:bg-surface-container transition-colors">
+                  Reset
+                </button>
+                <button id="timer-start-btn" class="px-6 py-2.5 rounded-lg bg-primary-container text-white font-body-sm font-semibold hover:bg-tertiary-container transition-all shadow-md flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                  <span>Start Focus</span>
+                </button>
+                <button id="timer-pause-btn" class="px-6 py-2.5 rounded-lg bg-amber-600 text-white font-body-sm font-semibold hover:bg-amber-700 transition-all shadow-md flex items-center gap-1.5 hidden">
+                  <span class="material-symbols-outlined text-[18px]">pause</span>
+                  <span>Pause</span>
+                </button>
+                <button id="timer-finish-btn" class="px-4 py-2 rounded-lg bg-secondary-container text-on-secondary-container font-body-sm font-medium hover:bg-secondary-container/80 transition-colors">
+                  Finish & Log
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Focus History Log -->
+            <div class="lg:col-span-6 p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Logged Focus Blocks</h2>
+                <span class="font-mono text-[11px] text-on-surface-variant">Recent sessions</span>
+              </div>
+              <div id="timer-history-list" class="flex flex-col gap-2.5 max-h-96 overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: MEALS & NUTRITION -->
+        <!-- ==================================================== -->
+        <div id="view-meals" class="view-panel hidden flex flex-col gap-6">
+          <div>
+            <h1 class="font-display text-2xl font-bold text-on-surface">Structured Meal Logging</h1>
+            <p class="font-body-md text-on-surface-variant mt-0.5">Record meals with local USDA nutrition calculation. No external API required.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left: Meal Form -->
+            <div class="lg:col-span-7 p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col gap-4">
+              <form id="meal-log-form" class="flex flex-col gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Meal Type</label>
+                    <select id="meal-type-select" class="w-full h-9 px-3 text-body-sm rounded-lg bg-surface-container-low border border-surface-container-high text-on-surface focus:outline-none">
+                      <option value="Breakfast">Breakfast</option>
+                      <option value="Lunch" selected>Lunch</option>
+                      <option value="Dinner">Dinner</option>
+                      <option value="Snack">Snack</option>
+                      <option value="Pre-Workout">Pre-Workout</option>
+                      <option value="Post-Workout">Post-Workout</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Time of Day</label>
+                    <input id="meal-time-input" type="time" class="w-full h-9 px-3 text-body-sm rounded-lg bg-surface-container-low border border-surface-container-high text-on-surface focus:outline-none font-mono"/>
+                  </div>
+                </div>
+
+                <!-- Food Items List -->
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-headline-sm text-on-surface font-semibold text-sm">Food Components</span>
+                    <button type="button" id="add-meal-item-btn" class="text-primary hover:text-tertiary font-body-sm text-[12px] font-medium flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px]">add</span>
+                      <span>Add Another Food</span>
+                    </button>
+                  </div>
+                  <div id="meal-items-container" class="flex flex-col gap-2.5"></div>
+                </div>
+
+                <!-- Optional Notes -->
+                <div>
+                  <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Notes (Optional)</label>
+                  <input id="meal-notes-input" type="text" placeholder="e.g. post-workout, light lunch" class="w-full h-9 px-3 text-body-sm rounded-lg bg-surface-container-low border border-surface-container-high text-on-surface focus:outline-none"/>
+                </div>
+
+                <!-- Subtotal Summary Box -->
+                <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high/40 flex items-center justify-between">
+                  <div>
+                    <span class="block font-mono text-[10px] uppercase text-on-surface-variant font-medium">Computed Fuel</span>
+                    <span id="meal-total-calories" class="font-display text-xl font-bold text-primary">0 kcal</span>
+                  </div>
+                  <div class="flex items-center gap-3 font-mono text-[11px] text-on-surface-variant">
+                    <span>Protein: <strong id="meal-total-protein" class="text-on-surface">0g</strong></span>
+                    <span>Carbs: <strong id="meal-total-carbs" class="text-on-surface">0g</strong></span>
+                    <span>Fat: <strong id="meal-total-fat" class="text-on-surface">0g</strong></span>
+                    <span>Fiber: <strong id="meal-total-fiber" class="text-on-surface">0g</strong></span>
+                  </div>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 rounded-lg bg-primary-container text-white font-body-sm font-semibold hover:bg-tertiary-container transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-[17px]">save</span>
+                  <span>Save Meal Log</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Right: Logged Meals History -->
+            <div class="lg:col-span-5 p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col gap-4">
+              <h2 class="font-headline-sm text-on-surface font-semibold text-lg">Logged Meal History</h2>
+              <div id="meals-history-list" class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: PRIVACY & METHODOLOGY -->
+        <!-- ==================================================== -->
+        <div id="view-privacy" class="view-panel hidden flex flex-col gap-6 max-w-3xl">
+          <div>
+            <h1 class="font-display text-2xl font-bold text-on-surface">Privacy & Methodology</h1>
+            <p class="font-body-md text-on-surface-variant mt-0.5">Understanding local-first data guarantees and behavioral modeling.</p>
+          </div>
+
+          <div class="p-6 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex flex-col gap-4">
+            <h2 class="font-headline-sm text-on-surface font-semibold text-lg flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">security</span>
+              Local-First Privacy Architecture
+            </h2>
+            <p class="font-body-md text-on-surface-variant leading-relaxed">
+              LifeLens processes personal behavioral, productivity, and nutritional data strictly on your local device. 
+              In Phase 1, all records are stored in a local SQLite database (<code class="font-mono bg-surface-container-low px-1.5 py-0.5 rounded text-xs">lifelens.db</code>). 
+              <strong>No personal data, task details, or dietary logs are transmitted to external servers or cloud services.</strong>
+            </p>
+
+            <div class="my-2 h-px bg-surface-container-high"></div>
+
+            <h2 class="font-headline-sm text-on-surface font-semibold text-lg flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">dataset</span>
+              Static USDA Nutrition Reference
+            </h2>
+            <p class="font-body-md text-on-surface-variant leading-relaxed">
+              Nutritional values are calculated using a bundled, offline subset of the <em>USDA FoodData Central</em> database. 
+              Gram conversions, macro allocations, and caloric densities are resolved locally without network latency or external tracking.
+            </p>
+
+            <div class="my-2 h-px bg-surface-container-high"></div>
+
+            <h2 class="font-headline-sm text-on-surface font-semibold text-lg flex items-center gap-2 text-error">
+              <span class="material-symbols-outlined">warning</span>
+              Important Medical Disclaimer
+            </h2>
+            <p class="font-body-md text-on-surface-variant leading-relaxed">
+              <strong>LifeLens is explicitly a personal behavioral productivity and nutrition analytics tool, NOT a medical diagnostic system or healthcare advisory.</strong>
+              The observations, correlation metrics, and focus-nutrition patterns are designed solely for self-reflection and cognitive pacing. They should never replace professional medical assessment, dietary consultation, or diagnosis.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Add Task -->
+  <div id="task-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-2xl border border-surface-container-high p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-headline-sm font-semibold text-on-surface text-lg">Add New Priority Task</h3>
+        <button onclick="document.getElementById('task-modal').classList.add('hidden')" class="p-1 rounded text-on-surface-variant hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="new-task-form" class="flex flex-col gap-3.5">
+        <div>
+          <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Task Title</label>
+          <input id="task-title-input" type="text" required placeholder="e.g. Complete Q4 Data Architecture" class="w-full h-9 px-3 text-body-sm rounded-lg border border-surface-container-high text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Category</label>
+            <select id="task-category-input" class="w-full h-9 px-2.5 text-body-sm rounded-lg border border-surface-container-high text-on-surface focus:outline-none">
+              <option value="Work">Work</option>
+              <option value="Deep Work">Deep Work</option>
+              <option value="Study">Study</option>
+              <option value="Health">Health</option>
+              <option value="Personal">Personal</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Priority</label>
+            <select id="task-priority-input" class="w-full h-9 px-2.5 text-body-sm rounded-lg border border-surface-container-high text-on-surface focus:outline-none">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-mono text-[11px] uppercase text-on-surface-variant font-medium mb-1">Estimated Duration (minutes)</label>
+          <input id="task-duration-input" type="number" min="5" max="480" value="25" class="w-full h-9 px-3 text-body-sm rounded-lg border border-surface-container-high text-on-surface font-mono focus:outline-none focus:ring-1 focus:ring-primary-container"/>
+        </div>
+        <div class="flex items-center justify-end gap-2.5 mt-3 pt-3 border-t border-surface-container-high/40">
+          <button type="button" onclick="document.getElementById('task-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg text-body-sm font-medium text-on-surface-variant hover:bg-surface-container-low transition-colors">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-primary-container text-white text-body-sm font-semibold hover:bg-tertiary-container transition-colors shadow-sm">
+            Create Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Client JavaScript -->
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+  <script src="/static/js/tasks.js"></script>
+  <script src="/static/js/timer.js"></script>
+  <script src="/static/js/meals.js"></script>
+</body>
+</html>
