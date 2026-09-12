@@ -1,5 +1,12 @@
 # LifeLens — Personal Productivity & Nutrition Analytics Web App
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-lifelens--71om.onrender.com-00C781?style=for-the-badge&logo=render&logoColor=white)](https://lifelens-71om.onrender.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+
+> **🌐 Live Web Application:** [https://lifelens-71om.onrender.com/](https://lifelens-71om.onrender.com/)  
+> **📖 Interactive API Docs (Swagger):** [https://lifelens-71om.onrender.com/docs](https://lifelens-71om.onrender.com/docs)
+
 LifeLens is a personal productivity and metabolic fuel tracking platform designed to bridge cognitive performance analytics with nutritional chrono-distribution.
 
 ---
@@ -211,9 +218,8 @@ erDiagram
 You can deploy LifeLens directly to cloud hosting platforms from this GitHub repository:
 
 - **Render** ([render.com](https://render.com)):
-  1. Click **New +** -> **Web Service** -> Connect GitHub repo `AyushkaSen/LifeLens`.
-  2. Select Python runtime, or let Render detect `render.yaml`.
-  3. Click **Create Web Service**. Your live URL will be ready at `https://lifelens.onrender.com`!
+  - **Active Live Web URL**: **[https://lifelens-71om.onrender.com/](https://lifelens-71om.onrender.com/)**
+  - Continuous deployment configured via `render.yaml`. Every push to `main` auto-deploys.
 
 - **Railway** ([railway.app](https://railway.app)):
   1. Click **New Project** -> **Deploy from GitHub repo** -> Select `LifeLens`.
